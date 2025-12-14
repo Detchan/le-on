@@ -3,102 +3,90 @@ import json
 from google import genai
 from google.genai import types
 
-# La clé d'API est lue automatiquement à partir de la variable d'environnement GEMINI_API_KEY
+# Initialisation du client Gemini
+# Il est préférable de lire la clé depuis les variables d'environnement (GEMINI_API_KEY)
+# Cela est nécessaire pour le déploiement sur Render.
 try:
-    client = genai.Client()
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 except Exception as e:
-    print(f"Erreur d'initialisation de l'IA : Assurez-vous que la variable GEMINI_API_KEY est définie. {e}")
+    # Gérer l'erreur si la clé n'est pas trouvée (utile en développement)
+    print("Erreur : La clé GEMINI_API_KEY n'est pas configurée dans les variables d'environnement.")
+    print(f"Détail de l'erreur: {e}")
     client = None
 
 
-def generate_quiz_and_review(text_content):
+def generate_quiz_and_review(text_content, subject):
+    """
+    Génère des fiches de révision et un quiz basé sur le contenu textuel fourni
+    et la matière sélectionnée.
+
+    Args:
+        text_content (str): Le texte extrait du document PDF.
+        subject (str): La matière sélectionnée par l'utilisateur (ex: 'Mathématiques').
+
+    Returns:
+        dict: Les résultats structurés en JSON (fiches et quiz).
+    """
+    
     if not client:
-        return {
-            "review_sheets": [{"title": "ERREUR DE CONFIGURATION", "points": ["L'API Gemini n'est pas configurée. Voir l'étape d'installation de la clé."]}],
-            "quiz": [{"question": "Configuration de l'IA manquante.", "options": ["A", "B"], "correct_answer": "N/A"}]
-        }
-
-    # Nouvelle consigne : demander 10 questions QCM et 3 fiches de révisions avec titres.
+        # Renvoyer une structure vide si l'API n'est pas initialisée
+        return {"review_sheets": [], "quiz": []}
+        
+    # --- PROMPT MIS À JOUR AVEC LA MATIÈRE ---
     prompt = f"""
-    En tant qu'outil pédagogique avancé, analyse le texte ci-dessous pour créer deux structures distinctes, complètes et bien détaillées :
-    1. 'review_sheets': Une liste de 3 fiches de révision séparées. Chaque fiche doit avoir un 'title' unique et pertinent et une liste de 5 à 7 'points' clés (points concis pour la mémorisation).
-    2. 'quiz': Une liste de 10 questions à choix multiples (QCM). Chaque question doit avoir 3 options (options) et la réponse correcte (correct_answer) doit être une des options.
-
-    Le résultat DOIT être un seul objet JSON valide et complet respectant la structure suivante :
+    Vous êtes un expert en {subject} et un assistant pédagogique. Votre tâche est de créer des outils
+    de révision à partir du texte suivant. 
+    
+    Instruction:
+    1. Générez au moins 3 fiches de révision (review_sheets) couvrant les points clés du document. 
+       Les titres et le contenu des fiches doivent être contextualisés pour la matière '{subject}'.
+    2. Générez 10 questions de quiz à choix unique (une seule bonne réponse) basées sur la matière {subject} et ce document.
+    
+    Utilisez le format JSON strict suivant pour la sortie:
     {{
         "review_sheets": [
-            {{
-                "title": "Titre du premier thème",
-                "points": ["Point 1", "Point 2", ...]
-            }},
-            {{
-                "title": "Titre du deuxième thème",
-                "points": ["Point 1", "Point 2", ...]
-            }}
+            {{"title": "Titre du thème 1 ({subject})", "points": ["Point clé 1", "Point clé 2", "Point clé 3", ... ]}},
+            {{"title": "Titre du thème 2 ({subject})", "points": ["Point clé 1", "Point clé 2", "Point clé 3", ... ]}},
+            {{"title": "Titre du thème 3 ({subject})", "points": ["Point clé 1", "Point clé 2", "Point clé 3", ... ]}}
         ],
         "quiz": [
-            {{
-                "question": "Votre question ici",
-                "options": ["Choix A", "Choix B", "Choix C"],
-                "correct_answer": "Choix B"
-            }},
-            ... (10 questions au total)
+            {{"question": "La question...", "options": ["Option A", "Option B", "Option C", "Option D"], "correct_answer": "La bonne option"}},
+            ... (9 autres questions)
         ]
     }}
     
-    TEXTE À ANALYSER :
+    Contenu à analyser:
     ---
-    {text_content[:6000]}
+    {text_content}
     ---
     """
     
-    # Configuration pour obtenir une réponse JSON structurée
-    config = types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema={
-            "type": "object",
-            "properties": {
-                "review_sheets": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "title": {"type": "string"},
-                            "points": {"type": "array", "items": {"type": "string"}}
-                        },
-                        "required": ["title", "points"]
-                    }
-                },
-                "quiz": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "question": {"type": "string"},
-                            "options": {"type": "array", "items": {"type": "string"}},
-                            "correct_answer": {"type": "string"}
-                        },
-                        "required": ["question", "options", "correct_answer"]
-                    }
-                }
-            },
-            "required": ["review_sheets", "quiz"]
-        },
-    )
-
     try:
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=prompt,
-            config=config,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+            ),
         )
         
+        # Le contenu de la réponse est une chaîne JSON valide
         return json.loads(response.text)
 
     except Exception as e:
         print(f"Erreur lors de l'appel à l'API Gemini : {e}")
-        # Retourne une structure compatible en cas d'erreur
-        return {
-            "review_sheets": [{"title": "ERREUR AI", "points": [f"Détails de l'erreur : {e}"]}],
-            "quiz": []
-        }
+        # Renvoyer une structure vide en cas d'échec
+        return {"review_sheets": [], "quiz": []}
+
+if __name__ == '__main__':
+    # Exemple de test si le script est exécuté directement
+    test_content = "Le théorème de Thalès stipule que si deux droites sécantes sont coupées par deux droites parallèles, alors les segments découpés sur les droites sécantes sont proportionnels. Ceci est fondamental en géométrie pour calculer des longueurs inconnues."
+    
+    # Assurez-vous d'avoir la variable GEMINI_API_KEY dans votre environnement pour tester
+    if client:
+        print("Génération de contenu test (Mathématiques)...")
+        results = generate_quiz_and_review(test_content, "Mathématiques")
+        print("\n--- RÉSULTATS GÉNÉRÉS ---")
+        print(json.dumps(results, indent=2, ensure_ascii=False))
+    else:
+        print("Test non exécuté car la clé API n'est pas configurée.")
