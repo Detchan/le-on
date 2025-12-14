@@ -10,6 +10,17 @@
     <h1>📚 Générateur de Révision Intelligent (IA)</h1>
     
     <form method="POST" enctype="multipart/form-data" class="upload-form">
+        
+        <select name="subject" required class="subject-select">
+            <option value="" disabled selected>Choisir la matière...</option>
+            <option value="Mathématiques">Mathématiques</option>
+            <option value="Physique-Chimie">Physique-Chimie</option>
+            <option value="Histoire-Géographie">Histoire-Géographie</option>
+            <option value="Philosophie">Philosophie</option>
+            <option value="Biologie">Biologie/SVT</option>
+            <option value="Autre">Autre (préciser dans le PDF)</option>
+        </select>
+        
         <input type="file" name="file" accept=".pdf" required>
         <button type="submit">Générer Fiches & Quizz</button>
     </form>
@@ -47,7 +58,7 @@
                             <ul class="options-list">
                                 {% for option in item.options %}
                                     <li class="option-item">
-                                        <input type="radio" name="q{{ loop.index }}" value="{{ option }}" required>
+                                        <input type="checkbox" name="q{{ loop.index }}" value="{{ option }}">
                                         {{ option }}
                                     </li>
                                 {% endfor %}
