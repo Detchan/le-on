@@ -1,0 +1,4 @@
+flask
+pypdf
+google-genai
+gunicorn

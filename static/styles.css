@@ -1,0 +1,211 @@
+/* Importation d'une police Google plus moderne */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+/* Styles de base */
+body { 
+    font-family: 'Poppins', sans-serif; 
+    max-width: 1200px; /* Élargissement pour plus d'espace */
+    margin: 0 auto; 
+    padding: 30px; 
+    background-color: #eef3f9; /* Fond plus doux */
+    line-height: 1.6;
+    color: #333;
+}
+h1 { 
+    text-align: center; 
+    color: #2c3e50; 
+    margin-bottom: 30px; 
+    font-weight: 700;
+}
+h2 {
+    font-size: 1.8em;
+    font-weight: 600;
+    color: #007bff; /* Bleu primaire */
+    margin-bottom: 20px;
+}
+
+/* Formulaire d'upload */
+.upload-form {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 50px;
+}
+input[type="file"] {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    flex-grow: 1;
+    background-color: #f9f9f9;
+}
+button[type="submit"] {
+    background-color: #007bff; /* Bleu plus vif */
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    font-weight: 600;
+    font-size: 1.05em;
+}
+button[type="submit"]:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* --- Styles des Onglets (Tabs) --- */
+.tabs-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+.tab-buttons {
+    display: flex;
+    border-bottom: 2px solid #e0e0e0;
+}
+.tab-button {
+    padding: 15px 30px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-size: 1.05em;
+    color: #555;
+    transition: color 0.3s;
+}
+.tab-button.active {
+    color: #007bff;
+    border-bottom: 3px solid #007bff;
+    font-weight: 600;
+}
+.tab-content {
+    display: none;
+    padding: 30px;
+}
+.tab-content.active {
+    display: block;
+}
+
+/* Styles Quiz */
+.quiz-item { 
+    margin-bottom: 35px; 
+    padding: 25px; 
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background-color: #fff;
+    transition: box-shadow 0.3s;
+}
+.quiz-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.question {
+    font-size: 1.15em;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+.options-list {
+    list-style-type: none;
+    padding: 0;
+}
+.option-item {
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border: 1px solid transparent;
+}
+.option-item:hover {
+    background-color: #f0f8ff;
+    border-color: #cce0ff;
+}
+.option-item input[type="radio"] {
+    margin-right: 12px;
+}
+.check-button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.2s;
+    color: white;
+}
+.check-button-verify {
+    background-color: #27ae60; /* Vert pour vérifier */
+}
+.check-button-verify:hover {
+    background-color: #1e8449;
+}
+.check-button-reset {
+    background-color: #95a5a6; /* Gris pour réinitialiser */
+    margin-left: 10px;
+}
+.check-button-reset:hover {
+    background-color: #7f8c8d;
+}
+
+/* Indicateurs de correction */
+.result-message {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+.correct {
+    color: #1e8449;
+    background-color: #e8f8f5;
+}
+.incorrect {
+    color: #c0392b;
+    background-color: #fcecec;
+}
+.correct-choice {
+    background-color: #d1ffd1 !important;
+    border: 1px solid #27ae60;
+}
+
+/* Style Fiche de Révision */
+.review-group {
+    margin-bottom: 40px;
+    padding: 20px;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    background-color: #fcfcfc;
+}
+.review-group h3 {
+    font-size: 1.4em;
+    color: #2c3e50;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+.review-point { 
+    margin-bottom: 10px; 
+    list-style-type: none; 
+    padding-left: 0;
+    border-left: 4px solid #007bff;
+    padding-left: 15px;
+    font-size: 1em;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body { padding: 20px; }
+    .upload-form {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .tab-buttons {
+        overflow-x: auto;
+    }
+}
