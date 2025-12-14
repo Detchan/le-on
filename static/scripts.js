@@ -1,5 +1,8 @@
 // --- FONCTIONS LOGIQUES DE BASE ---
 
+/**
+ * Gère l'affichage des différents onglets.
+ */
 function switchTab(tabName, clickedButton) {
     let tabcontent = document.getElementsByClassName("tab-content");
     for (let i = 0; i < tabcontent.length; i++) {
@@ -17,23 +20,21 @@ function switchTab(tabName, clickedButton) {
 
 /**
  * Envoie les réponses de l'utilisateur au serveur pour vérification (sécurisée).
- * Gère les cases à cocher.
  */
 function checkAnswers() {
     const quizForm = document.getElementById('quiz-form');
     if (!quizForm) return;
 
-    // 1. Collecter les réponses du formulaire
-    // On doit reconstruire les données manuellement pour que Flask reçoive toutes les cases cochées
+    // 1. Collecter les réponses du formulaire (on prend la première case cochée pour chaque question)
     const data = {};
     const questions = document.querySelectorAll('.quiz-item');
 
     questions.forEach((item, index) => {
         const q_num = index + 1;
+        // Cibler les cases à cocher
         const checkedInputs = item.querySelectorAll(`input[name="q${q_num}"]:checked`);
         
-        // Pour l'instant, nous envoyons seulement la première réponse cochée
-        // car le back-end (app.py) n'est pas encore prêt pour les réponses multiples.
+        // Comme le back-end ne gère qu'une seule bonne réponse, nous envoyons SEULEMENT la première réponse cochée
         if (checkedInputs.length > 0) {
             data[`q${q_num}`] = checkedInputs[0].value;
         }
@@ -81,18 +82,16 @@ function applyCorrection(correctionData) {
 
         if (!correction) return; 
 
-        // 1. Afficher le résultat (Note : Le message suppose toujours une seule bonne réponse)
+        // Afficher le résultat
         if (correction.is_correct) {
             resultMessage.textContent = "✅ Correct !";
             resultMessage.classList.add('correct');
         } else {
-            // Ici, nous supposons que l'utilisateur a soit mal répondu, soit coché plusieurs cases
-            // (seule la première est vérifiée par Flask actuellement).
             resultMessage.textContent = `❌ Faux. La réponse correcte était : ${correction.correct_answer}`;
             resultMessage.classList.add('incorrect');
         }
         
-        // 2. Surligner la bonne réponse
+        // Surligner la bonne réponse
         optionsList.forEach(opt => {
             const input = opt.querySelector('input');
             if (input.value === correction.correct_answer) {
@@ -126,11 +125,11 @@ function resetQuizVisuals() {
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 1. GESTION DES ONGLETS
     const tabsContainer = document.querySelector('.tabs-container');
     
     if (tabsContainer) {
         
+        // 1. GESTION DES ONGLETS
         const tabButtons = document.querySelectorAll('.tab-buttons button');
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -146,22 +145,21 @@ document.addEventListener('DOMContentLoaded', () => {
              switchTab('review', reviewButton);
         }
         
-        // NOUVEAU : On attache un écouteur générique aux changements pour retirer les messages de correction
+        // 2. RETIRER LES MESSAGES DE CORRECTION AU CHANGEMENT DE RÉPONSE
         const quizForm = document.getElementById('quiz-form');
         if (quizForm) {
+            // Puisque ce sont des checkboxes, le comportement de désélection est natif
             quizForm.addEventListener('change', resetQuizVisuals);
         }
     }
     
-    // 2. GESTION DES BOUTONS DE QUIZ
+    // 3. GESTION DES BOUTONS DE QUIZ
     
-    // Attacher la fonction checkAnswers au bouton "Vérifier"
     const checkButton = document.getElementById('verify-button');
     if (checkButton) {
         checkButton.addEventListener('click', checkAnswers);
     }
     
-    // Gérer le bouton "Générer un autre Quiz"
     const generateButton = document.getElementById('generate-new-quiz');
     if (generateButton) {
         generateButton.addEventListener('click', () => {
